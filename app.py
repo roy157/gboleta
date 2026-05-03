@@ -11,9 +11,11 @@ app = Flask(__name__, static_folder='static')
 
 # --- CONFIGURACIÓN DE ESTILO ---
 COLOR_NEGRO = (0, 0, 0)
-FOLDER_FUENTES = "fuentes"
-FUENTE_GENERAL = os.path.join(FOLDER_FUENTES, "HELVETICA.ttf")
-FUENTE_BOLD = os.path.join(FOLDER_FUENTES, "HELVETICA-BOLD.ttf")
+# --- CODIGO NUEVO (CORREGIDO) ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FOLDER_FUENTES = os.path.join(BASE_DIR, "fuentes")
+FUENTE_GENERAL = os.path.join(BASE_DIR, "fuentes", "HELVETICA.ttf")
+FUENTE_BOLD = os.path.join(BASE_DIR, "fuentes", "HELVETICA-BOLD.ttf")
 
 # Diccionario Maestro de Configuraciones
 CONFIG_TIPOS = {
@@ -169,7 +171,8 @@ def generar_documento(texto_input, tipo_boleta):
     texto_input = re.sub(r'\[.*?\]', '', texto_input)
     config = CONFIG_TIPOS.get(tipo_boleta, CONFIG_TIPOS["empresa"])
     base_dir = os.path.dirname(__file__)
-    ruta_fondo = os.path.join(base_dir, "imagenes", config["archivo"])
+    # --- CODIGO NUEVO (CORREGIDO) ---
+    ruta_fondo = os.path.join(BASE_DIR, "imagenes", config["archivo"])
     
     if not os.path.exists(ruta_fondo):
         return None
