@@ -3,6 +3,7 @@ import io
 import base64
 import re
 import random
+import pytz  # Librería para la zona horaria
 from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from PIL import Image, ImageDraw, ImageFont
@@ -256,8 +257,13 @@ def index():
             tipo_previo = request.form.get('tipo_boleta', 'empresa')
 
         # --- LÓGICA DE ACTUALIZACIÓN EN CADA CLIC ---
+# --- LÓGICA DE ACTUALIZACIÓN EN CADA CLIC ---
         n_trans_nuevo = "25" + "".join([str(random.randint(0, 9)) for _ in range(7)])
-        fecha_nueva = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        
+        # Configuramos la hora exacta de Perú
+        peru_tz = pytz.timezone('America/Lima')
+        fecha_peru = datetime.now(peru_tz)
+        fecha_nueva = fecha_peru.strftime("%d/%m/%Y %H:%M:%S")
         
         # 1. Reemplazar o añadir N_TRANS
         if re.search(r'(?i)n_trans:.*', texto_recibido):
