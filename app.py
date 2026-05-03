@@ -14,8 +14,8 @@ COLOR_NEGRO = (0, 0, 0)
 # --- CODIGO NUEVO (CORREGIDO) ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FOLDER_FUENTES = os.path.join(BASE_DIR, "fuentes")
-FUENTE_GENERAL = os.path.join(BASE_DIR, "fuentes", "HELVETICA.ttf")
-FUENTE_BOLD = os.path.join(BASE_DIR, "fuentes", "HELVETICA-BOLD.ttf")
+FUENTE_GENERAL = os.path.join(BASE_DIR, "fuentes", "helvetica.ttf")
+FUENTE_BOLD = os.path.join(BASE_DIR, "fuentes", "helvetica-bold.ttf")
 
 # Diccionario Maestro de Configuraciones
 CONFIG_TIPOS = {
