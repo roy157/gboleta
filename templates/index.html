@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <title>Generador de Boletas</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; color: #333; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); width: 95%; max-width: 1000px; margin-top: 20px; }
+        .main-title { text-align: center; color: #1a73e8; font-size: 28px; font-weight: bold; margin-bottom: 25px; border-bottom: 2px solid #e8f0fe; padding-bottom: 15px; text-transform: uppercase; }
+        
+        .tabs-container { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 5px; }
+        .header-buttons-left { display: flex; gap: 4px; }
+        .btn-tab { border: none; padding: 8px 16px; font-size: 12px; cursor: pointer; font-weight: bold; color: white; text-decoration: none; border-radius: 8px 8px 0 0; }
+        .btn-copy { background: #6f42c1; } .btn-follow { background: #007bff; } .btn-ia { background: #e91e63; } .btn-clear { background: #f2994a; }
+
+.selector-row { 
+            background: #f8f9fa; 
+            border: 1px solid #dadce0; 
+            border-bottom: none; 
+            padding: 10px 15px; 
+            display: flex; 
+            gap: 20px; /* Espacio entre los dos selectores */
+        }
+        .selector-item { 
+            flex: 1; /* Hace que ambos ocupen el mismo ancho */
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .selector-item label { 
+            font-size: 12px; 
+            font-weight: bold; 
+            color: #555; 
+            white-space: nowrap; /* Evita que el texto del label se rompa */
+        }
+        .selector-item select { 
+            width: 100%; 
+            padding: 8px; 
+            border-radius: 6px; 
+            border: 1px solid #ddd; 
+            outline: none; 
+            cursor: pointer; 
+            background: white;
+        }
+
+        textarea { width: 100%; height: 380px; padding: 15px; border: 1px solid #dadce0; border-radius: 0; box-sizing: border-box; font-family: 'Consolas', monospace; font-size: 14px; outline: none; resize: none; }
+        
+        .tabs-bottom { margin-top: -2px; }
+        .tabs-bottom .btn-tab { border-radius: 0 0 8px 8px; }
+
+        .buttons { display: flex; gap: 15px; margin-top: 25px; }
+        .main-btn { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-preview { background: #1a73e8; }
+        .btn-download { background: #34a853; }
+        
+        .preview-area { margin-top: 30px; text-align: center; border-top: 2px solid #f1f3f4; padding-top: 25px; }
+        .preview-area img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    
+        .selector-item input {
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        outline: none;
+}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="main-title">📄 GENERADOR DE BOLETAS</h1>
+
+    <form method="POST" id="mainForm">
+        <div class="tabs-container">
+            <div class="header-buttons-left">
+                <a href="https://gemini.google.com/app/f4a5be22a54b0dfb?hl=es" target="_blank" class="btn-tab btn-copy">✨ Gemini</a>
+                <a href="https://www.kimi.com/chat/19dee448-ab42-86e7-8000-090b75329a07?chat_enter_method=new_chat" target="_blank" class="btn-tab btn-follow">✨ Kimi</a>
+                <a href="https://chat.mistral.ai/chat/3bc9ab9a-6141-4d7e-a06a-42c6d234a92e" target="_blank" class="btn-tab btn-ia">✨ Mistral</a>
+            </div>
+            <button type="button" class="btn-tab btn-clear" onclick="document.getElementById('texto_datos').value = ''">🧹 Limpiar</button>
+        </div>
+
+        <div class="selector-row">
+            <!-- Selector Tipo de Boleta -->
+            <div class="selector-item">
+                <label>TIPO:</label>
+                <select name="tipo_boleta">
+                    <option value="1_propietario" {% if tipo_boleta == '1_propietario' %}selected{% endif %}>1 Propietario</option>
+                    <option value="2_propietarios" {% if tipo_boleta == '2_propietarios' %}selected{% endif %}>2 Propietarios</option>
+                    <option value="empresa" {% if tipo_boleta == 'empresa' %}selected{% endif %}>Empresa</option>
+                </select>
+            </div>
+        <!-- Nuevo Buscador de Oficina -->
+            <div class="selector-item">
+                <label>OFICINA:</label>
+                <input list="oficinas_list" 
+                    id="select_oficina" 
+                    name="oficina_valor" 
+                    value="{{ oficina_seleccionada }}" 
+                    placeholder="Escribe para buscar..." 
+                    autocomplete="off">                
+                    
+                    <datalist id="oficinas_list">
+                    <option value="ABANCAY">
+                    <option value="ANDAHUAYLAS">
+                    <option value="AREQUIPA">
+                    <option value="AYACUCHO">
+                    <option value="BAGUA">
+                    <option value="BARRANCA">
+                    <option value="CAJAMARCA">
+                    <option value="CALLAO">
+                    <option value="CAMANA">
+                    <option value="CASMA">
+                    <option value="CASTILLA APLAO">
+                    <option value="CAÑETE">
+                    <option value="CHACHAPOYAS">
+                    <option value="CHEPEN">
+                    <option value="CHICLAYO">
+                    <option value="CHIMBOTE">
+                    <option value="CHINCHA">
+                    <option value="CHOTA">
+                    <option value="CUSCO">
+                    <option value="ESPINAR">
+                    <option value="HUACHO">
+                    <option value="HUAMACHUCO">
+                    <option value="HUANCAVELICA">
+                    <option value="HUANCAYO">
+                    <option value="HUANTA">
+                    <option value="HUANUCO">
+                    <option value="HUARAL">
+                    <option value="HUARAZ">
+                    <option value="ICA">
+                    <option value="ILO">
+                    <option value="ISLAY MOLLENDO">
+                    <option value="JAEN">
+                    <option value="JUANJUI">
+                    <option value="JULIACA">
+                    <option value="LA MERCED (SELVA CENTRAL)">
+                    <option value="LIMA">
+                    <option value="MADRE DE DIOS">
+                    <option value="MAYNAS">
+                    <option value="MOQUEGUA">
+                    <option value="MOYOBAMBA">
+                    <option value="NAZCA">
+                    <option value="OTUZCO">
+                    <option value="PASCO">
+                    <option value="PISCO">
+                    <option value="PIURA">
+                    <option value="PUCALLPA">
+                    <option value="PUNO">
+                    <option value="QUILLABAMBA">
+                    <option value="SAN PEDRO">
+                    <option value="SATIPO">
+                    <option value="SICUANI">
+                    <option value="SULLANA">
+                    <option value="TACNA">
+                    <option value="TARAPOTO">
+                    <option value="TARMA">
+                    <option value="TINGO MARIA">
+                    <option value="TRUJILLO">
+                    <option value="TUMBES">
+                    <option value="YURIMAGUAS">
+                </datalist>
+            </div>
+        </div>
+
+        <textarea name="texto_datos" id="texto_datos" placeholder="Pega los datos aquí...">{{ texto }}</textarea>
+
+        <div class="tabs-container tabs-bottom">
+            <div class="header-buttons-left">
+                <a href="https://consultavehicular.sunarp.gob.pe/" target="_blank" class="btn-tab btn-follow">🔍 Consulta Veh.</a>
+                <a href="https://copialiteral-altoque.sunarp.gob.pe/copialiteral-altoque/#/busqueda/busqueda-partida" target="_blank" class="btn-tab btn-copy">🧬 Copia Literal</a>
+                <a href="https://sprl.sunarp.gob.pe/" target="_blank" class="btn-tab btn-ia">📝 Reg. Sunarp</a>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button type="submit" class="main-btn btn-preview">🔍 Vista Previa</button>
+            <button type="button" onclick="descargarPDF()" class="main-btn btn-download">📥 Descargar PDF</button>
+        </div>
+    </form>
+
+    {% if imagen_preview %}
+    <div class="preview-area" id="resultado">
+        <h3>Vista Previa Generada:</h3>
+        <img src="data:image/jpeg;base64,{{ imagen_preview }}">
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function descargarPDF() {
+        const f = document.getElementById('mainForm');
+        f.action = '/descargar';
+        f.submit();
+        setTimeout(() => { f.action = '/'; }, 100);
+    }
+
+    window.onload = function() {
+        const res = document.getElementById('resultado');
+        if (res) res.scrollIntoView({ behavior: 'smooth' });
+    };
+</script>
+
+<script>
+    const textarea = document.getElementById('texto_datos');
+    const selector = document.querySelector('select[name="tipo_boleta"]');
+    const selectorOficina = document.getElementById('select_oficina');
+
+    selectorOficina.addEventListener('input', function() {
+        let ciudad = this.value.toUpperCase();
+        let contenido = textarea.value;
+
+        // Solo actualizamos el texto si la ciudad escrita es válida (está en la lista)
+        const opciones = document.querySelectorAll('#oficinas_list option');
+        const existe = Array.from(opciones).some(opt => opt.value === ciudad);
+
+        if (existe) {
+            const nuevaLinea = `oficina: OFICINA ${ciudad}`;
+            if (contenido.toLowerCase().includes('oficina:')) {
+                textarea.value = contenido.replace(/oficina:[^\n\r]*/i, nuevaLinea);
+            } else {
+                textarea.value = contenido.trim() + "\n" + nuevaLinea;
+            }
+            // Forzamos la actualización para que Flask vea el cambio
+            textarea.dispatchEvent(new Event('input'));
+        }
+    });
+
+    textarea.addEventListener('input', function() {
+        // Cambiamos a 'let' para permitir la limpieza del texto
+        let contenido = this.value;
+
+        // --- AGREGADO: Limpieza de corchetes ---
+        if (contenido.includes('[') && contenido.includes(']')) {
+            contenido = contenido.replace(/\[.*?\]/g, '');
+            this.value = contenido;
+        }
+
+        // Dentro del evento input del textarea
+        const matchOficina = contenido.match(/oficina:\s*OFICINA\s+([^\n\r]*)/i);
+        if (matchOficina) {
+            let ciudadExtraida = matchOficina[1].trim().toUpperCase();
+            
+            // Esto asegura que el cuadro de búsqueda muestre la ciudad
+            if (selectorOficina.value !== ciudadExtraida) {
+                selectorOficina.value = ciudadExtraida;
+            }
+        } else {
+            // Si borras la oficina del texto, limpia el buscador también
+            selectorOficina.value = "";
+        }
+
+        if (contenido.includes('n_juridico_1:')) {
+            selector.value = 'empresa';
+        } 
+        else if (contenido.includes('n_propietario_2:')) {
+            selector.value = '2_propietarios';
+        } 
+        else if (contenido.includes('n_propietario_1:')) {
+            selector.value = '1_propietario';
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        textarea.dispatchEvent(new Event('input'));
+    });
+</script>
+</body>
+</html>
